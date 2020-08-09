@@ -25,7 +25,9 @@ public class CardWithDeliveryTest {
             .log(LogDetail.ALL)
             .build();
 
-    void updateUser(RegistrationInfo registrationInfo) {
+    private UserInfo userInfo;
+
+    static void updateUser(RegistrationInfo registrationInfo) {
         given()
                 .spec(requestSpec)
                 .body(registrationInfo)
@@ -35,24 +37,24 @@ public class CardWithDeliveryTest {
                 .statusCode(200);
     }
 
-    void blockUser(UserInfo userInfo) {
+    static void blockUser(UserInfo userInfo) {
         updateUser(getBlockedRegistrationInfoByUserInfo(userInfo));
     }
 
-    void createUser(UserInfo userInfo) {
+    static void createUser(UserInfo userInfo) {
         updateUser(getActiveRegistrationInfoByUserInfo(userInfo));
     }
 
     @BeforeEach
     void setUp() {
         open("http://localhost:9999");
+        userInfo = getRandomUserInfo();
     }
 
     @Nested
     class HappyPathTests {
         @Test
         void shouldLoginIfActive() {
-            UserInfo userInfo = getRandomUserInfo();
             try {
                 createUser(userInfo);
                 $("[data-test-id=login] input").sendKeys(userInfo.login);
@@ -66,7 +68,6 @@ public class CardWithDeliveryTest {
 
         @Test
         void shouldNotLoginIfBlocked() {
-            UserInfo userInfo = getRandomUserInfo();
             blockUser(userInfo);
 
             $("[data-test-id=login] input").sendKeys(userInfo.login);
@@ -79,8 +80,6 @@ public class CardWithDeliveryTest {
 
         @Test
         void shouldNotLoginIfNotExist() {
-            UserInfo userInfo = getRandomUserInfo();
-
             $("[data-test-id=login] input").sendKeys(userInfo.login);
             $("[data-test-id=password] input").sendKeys(userInfo.password);
 
@@ -94,7 +93,6 @@ public class CardWithDeliveryTest {
     class SadPathTests {
         @Test
         void shouldNotLoginIfIncorrectPassword() {
-            UserInfo userInfo = getRandomUserInfo();
             try {
                 createUser(userInfo);
                 $("[data-test-id=login] input").sendKeys(userInfo.login);
@@ -108,7 +106,6 @@ public class CardWithDeliveryTest {
         }
         @Test
         void shouldNotLoginIfIncorrectUser() {
-            UserInfo userInfo = getRandomUserInfo();
             try {
                 createUser(userInfo);
                 $("[data-test-id=login] input").sendKeys("prefix" + userInfo.login);
