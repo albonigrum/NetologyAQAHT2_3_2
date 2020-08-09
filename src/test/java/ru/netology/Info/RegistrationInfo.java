@@ -1,9 +1,5 @@
 package ru.netology.Info;
 
-import com.github.javafaker.Faker;
-
-import java.util.Locale;
-
 public class RegistrationInfo {
     public final String login;
     public final String password;
@@ -15,7 +11,7 @@ public class RegistrationInfo {
         this.status = status;
     }
 
-    public static RegistrationInfo getActiveRandomRegistrationInfo(UserInfo userInfo) {
+    public static RegistrationInfo getActiveRegistrationInfoByUserInfo(UserInfo userInfo) {
         return new RegistrationInfo(
                 userInfo.login,
                 userInfo.password,
@@ -23,7 +19,7 @@ public class RegistrationInfo {
         );
     }
 
-    public static RegistrationInfo getBlockedRandomRegistrationInfo(UserInfo userInfo) {
+    public static RegistrationInfo getBlockedRegistrationInfoByUserInfo(UserInfo userInfo) {
         return new RegistrationInfo(
                 userInfo.login,
                 userInfo.password,

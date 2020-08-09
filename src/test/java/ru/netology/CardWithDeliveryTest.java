@@ -36,11 +36,11 @@ public class CardWithDeliveryTest {
     }
 
     void blockUser(UserInfo userInfo) {
-        updateUser(getBlockedRandomRegistrationInfo(userInfo));
+        updateUser(getBlockedRegistrationInfoByUserInfo(userInfo));
     }
 
     void createUser(UserInfo userInfo) {
-        updateUser(getActiveRandomRegistrationInfo(userInfo));
+        updateUser(getActiveRegistrationInfoByUserInfo(userInfo));
     }
 
     @BeforeEach
