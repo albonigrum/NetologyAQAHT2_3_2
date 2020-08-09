@@ -15,17 +15,7 @@ public class RegistrationInfo {
         this.status = status;
     }
 
-    public static RegistrationInfo getRandomRegistrationInfo() {
-        Faker faker = new Faker(new Locale("en"));
-        return new RegistrationInfo(
-                faker.name().username(),
-                faker.internet().password(),
-                (faker.bool().bool() ? "active" : "blocked")
-        );
-    }
-
     public static RegistrationInfo getActiveRandomRegistrationInfo(UserInfo userInfo) {
-        Faker faker = new Faker(new Locale("en"));
         return new RegistrationInfo(
                 userInfo.login,
                 userInfo.password,
@@ -34,7 +24,6 @@ public class RegistrationInfo {
     }
 
     public static RegistrationInfo getBlockedRandomRegistrationInfo(UserInfo userInfo) {
-        Faker faker = new Faker(new Locale("en"));
         return new RegistrationInfo(
                 userInfo.login,
                 userInfo.password,
