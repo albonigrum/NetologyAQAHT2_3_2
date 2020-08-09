@@ -16,7 +16,7 @@ import static io.restassured.RestAssured.given;
 import static ru.netology.Info.RegistrationInfo.*;
 import static ru.netology.Info.UserInfo.getRandomUserInfo;
 
-public class CardWithDeliveryTest {
+public class AuthorizationFormTest {
     private static final RequestSpecification requestSpec = new RequestSpecBuilder()
             .setBaseUri("http://localhost")
             .setPort(9999)
