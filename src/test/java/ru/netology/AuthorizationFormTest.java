@@ -7,13 +7,13 @@ import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import ru.netology.Info.RegistrationInfo;
+import ru.netology.Info.AuthorizationInfo;
 import ru.netology.Info.UserInfo;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.*;
 import static io.restassured.RestAssured.given;
-import static ru.netology.Info.RegistrationInfo.*;
+import static ru.netology.Info.AuthorizationInfo.*;
 import static ru.netology.Info.UserInfo.getRandomUserInfo;
 
 public class AuthorizationFormTest {
@@ -27,10 +27,10 @@ public class AuthorizationFormTest {
 
     private UserInfo userInfo;
 
-    static void updateUser(RegistrationInfo registrationInfo) {
+    static void updateUser(AuthorizationInfo authorizationInfo) {
         given()
                 .spec(requestSpec)
-                .body(registrationInfo)
+                .body(authorizationInfo)
         .when()
                 .post("/api/system/users")
         .then()
@@ -38,11 +38,11 @@ public class AuthorizationFormTest {
     }
 
     static void blockUser(UserInfo userInfo) {
-        updateUser(getBlockedRegistrationInfoByUserInfo(userInfo));
+        updateUser(getBlockedAuthorizationInfoByUserInfo(userInfo));
     }
 
     static void createUser(UserInfo userInfo) {
-        updateUser(getActiveRegistrationInfoByUserInfo(userInfo));
+        updateUser(getActiveAuthorizationInfoByUserInfo(userInfo));
     }
 
     @BeforeEach
