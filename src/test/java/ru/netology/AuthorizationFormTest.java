@@ -1,91 +1,66 @@
 package ru.netology;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.filter.log.LogDetail;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import ru.netology.Info.AuthorizationInfo;
-import ru.netology.Info.UserInfo;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.*;
-import static io.restassured.RestAssured.given;
 import static ru.netology.Info.AuthorizationInfo.*;
-import static ru.netology.Info.UserInfo.getRandomUserInfo;
 
 public class AuthorizationFormTest {
-    private static final RequestSpecification requestSpec = new RequestSpecBuilder()
-            .setBaseUri("http://localhost")
-            .setPort(9999)
-            .setAccept(ContentType.JSON)
-            .setContentType(ContentType.JSON)
-            .log(LogDetail.ALL)
-            .build();
+    private AuthorizationInfo authInfo;
 
-    private UserInfo userInfo;
+    void inputFieldsFormAndClickLogin(AuthorizationInfo authInfo) {
+        $("[data-test-id=login] input").sendKeys(authInfo.login);
+        $("[data-test-id=password] input").sendKeys(authInfo.password);
 
-    static void updateUser(AuthorizationInfo authorizationInfo) {
-        given()
-                .spec(requestSpec)
-                .body(authorizationInfo)
-        .when()
-                .post("/api/system/users")
-        .then()
-                .statusCode(200);
+        $("button[data-test-id=action-login]").click();
     }
 
-    static void blockUser(UserInfo userInfo) {
-        updateUser(getBlockedAuthorizationInfoByUserInfo(userInfo));
+    void inputFieldsFormAndClickLogin() {
+        inputFieldsFormAndClickLogin(authInfo);
     }
 
-    static void createUser(UserInfo userInfo) {
-        updateUser(getActiveAuthorizationInfoByUserInfo(userInfo));
+    void checkErrorUserOrPasswordIncorrect() {
+        $("[data-test-id=error-notification]").shouldHave(text("Ошибка! Неверно указан логин или пароль"));
+    }
+
+    void checkErrorUserBlocked() {
+        $("[data-test-id=error-notification]").shouldHave(text("Ошибка! Пользователь заблокирован"));
     }
 
     @BeforeEach
     void setUp() {
         open("http://localhost:9999");
-        userInfo = getRandomUserInfo();
     }
 
     @Nested
     class HappyPathTests {
         @Test
         void shouldLoginIfActive() {
-            try {
-                createUser(userInfo);
-                $("[data-test-id=login] input").sendKeys(userInfo.login);
-                $("[data-test-id=password] input").sendKeys(userInfo.password);
-
-                $("button[data-test-id=action-login]").click();
-            } finally {
-                blockUser(userInfo);
-            }
+            authInfo = getActiveAuthorizationInfo();
+            inputFieldsFormAndClickLogin();
         }
 
         @Test
         void shouldNotLoginIfBlocked() {
-            blockUser(userInfo);
+            authInfo = getBlockedAuthorizationInfo();
 
-            $("[data-test-id=login] input").sendKeys(userInfo.login);
-            $("[data-test-id=password] input").sendKeys(userInfo.password);
+            inputFieldsFormAndClickLogin();
 
-            $("button[data-test-id=action-login]").click();
-
-            $("[data-test-id=error-notification]").shouldHave(text("Ошибка! Пользователь заблокирован"));
+            checkErrorUserBlocked();
         }
 
         @Test
         void shouldNotLoginIfNotExist() {
-            $("[data-test-id=login] input").sendKeys(userInfo.login);
-            $("[data-test-id=password] input").sendKeys(userInfo.password);
+            //Так как нет операции удаления этот тест может не проходить в случае генерации одинаковых данных
+            authInfo = getNotExistAuthorizationInfo();
 
-            $("button[data-test-id=action-login]").click();
+            inputFieldsFormAndClickLogin();
 
-            $("[data-test-id=error-notification]").shouldHave(text("Ошибка! Неверно указан логин или пароль"));
+            checkErrorUserOrPasswordIncorrect();
         }
     }
 
@@ -93,30 +68,20 @@ public class AuthorizationFormTest {
     class SadPathTests {
         @Test
         void shouldNotLoginIfIncorrectPassword() {
-            try {
-                createUser(userInfo);
-                $("[data-test-id=login] input").sendKeys(userInfo.login);
-                $("[data-test-id=password] input").sendKeys("prefix" + userInfo.password);
+            authInfo = getActiveAuthorizationInfo();
 
-                $("button[data-test-id=action-login]").click();
-                $("[data-test-id=error-notification]").shouldHave(text("Ошибка! Неверно указан логин или пароль"));
-            } finally {
-                blockUser(userInfo);
-            }
+            inputFieldsFormAndClickLogin(getNotExistAuthorizationInfoWithLogin(authInfo.login));
+
+            checkErrorUserOrPasswordIncorrect();
         }
+
         @Test
         void shouldNotLoginIfIncorrectUser() {
-            try {
-                createUser(userInfo);
-                $("[data-test-id=login] input").sendKeys("prefix" + userInfo.login);
-                $("[data-test-id=password] input").sendKeys(userInfo.password);
+            authInfo = getActiveAuthorizationInfo();
 
-                $("button[data-test-id=action-login]").click();
+            inputFieldsFormAndClickLogin(getNotExistAuthorizationInfoWithPassword(authInfo.password));
 
-                $("[data-test-id=error-notification]").shouldHave(text("Ошибка! Неверно указан логин или пароль"));
-            } finally {
-                blockUser(userInfo);
-            }
+            checkErrorUserOrPasswordIncorrect();
         }
     }
 
